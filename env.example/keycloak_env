@@ -1,0 +1,26 @@
+KC_BOOTSTRAP_ADMIN_USERNAME=admin
+KC_BOOTSTRAP_ADMIN_PASSWORD=<replace_with_a_strong_password>
+KC_PROXY=edge
+KC_PROXY_HEADERS=xforwarded
+KC_HOSTNAME=localhost
+KC_DB=postgres
+KC_DB_URL=jdbc:postgresql://postgres:5432/keycloak
+KC_DB_USERNAME=keycloak
+KC_DB_PASSWORD=<replace_with_db_password>
+KC_HTTP_ENABLED=true
+KC_HOSTNAME_STRICT=false
+KC_HEALTH_ENABLED=true
+KC_METRICS_ENABLED=true
+KC_FEATURES=token-exchange
+HIBERNATE_DDL_AUTO=validate
+HIBERNATE_SHOW_SQL=true
+HIBERNATE_FORMAT_SQL=true
+# OBP Keycloak provider config
+DB_DRIVER=org.postgresql.Driver
+DB_DIALECT=org.hibernate.dialect.PostgreSQLDialect
+DB_USER=oidc_user
+DB_AUTHUSER_TABLE=v_oidc_users
+DB_URL=jdbc:postgresql://postgres:5432/obp
+DB_PASSWORD=<replace_with_db_password>
+OBP_AUTHUSER_PROVIDER=http://obp-api:8080
+FORGOT_PASSWORD_URL=

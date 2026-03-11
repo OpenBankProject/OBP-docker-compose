@@ -1,0 +1,18 @@
+[Unit]
+Description=OBP Docker Compose Service Watchdog
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/obp/obp-docker-compose
+ExecStart=/opt/obp-docker-compose/manage.sh watch 60
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=obp-watchdog
+User=root
+
+[Install]
+WantedBy=multi-user.target

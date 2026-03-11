@@ -1,0 +1,240 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: unless-stopped
+    env_file:
+      - env/postgres_env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U obp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - obp-network
+
+  # Redis Cache
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - obp-network
+
+  # Keycloak for OAuth2/OIDC
+  keycloak:
+    image: openbankproject/obp-keycloak:main-themed
+    container_name: keycloak
+    restart: unless-stopped
+    env_file:
+      - env/keycloak_env
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        ["CMD-SHELL", "curl -f http://localhost:8080/realms/master || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - obp-network
+
+  # OBP OIDC
+  obp-oidc:
+    image: openbankproject/obp-oidc:latest
+    container_name: obp-oidc
+    restart: unless-stopped
+    env_file:
+      - env/obp_oidc_env
+    ports:
+      - "9009:9009"
+    healthcheck:
+      test:
+        ["CMD-SHELL", "curl -f http://localhost:9009/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - obp-network
+
+  # OBP API
+  obp-api:
+    image: openbankproject/obp-api:latest
+    container_name: api
+    restart: unless-stopped
+    env_file:
+      - env/obp_api_env
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/alive.html || exit 1"]
+      interval: 30s
+      timeout: 15s
+      retries: 10
+      start_period: 180s
+    networks:
+      - obp-network
+
+  # API Explorer II
+  api-explorer:
+    image: openbankproject/api-explorer-ii:latest
+    container_name: api-explorer
+    restart: unless-stopped
+    env_file:
+      - env/api_explorer_env
+    ports:
+      - "8085:8085"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "<api-hostname>:host-gateway"
+      - "<keycloak-hostname>:host-gateway"       
+    depends_on:
+      - obp-api
+      - redis
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8085/ || exit 1"]
+      interval: 30s
+      timeout: 20s
+      retries: 5
+      start_period: 60s
+    networks:
+      - obp-network
+
+  api-explorer-nginx:
+    image: openbankproject/api-explorer-ii-nginx:latest
+    container_name: api-explorer-nginx
+    restart: unless-stopped
+    env_file:
+      - env/api_explorer_env
+    ports:
+      - "8086:8085"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "<api-hostname>:host-gateway"
+      - "<keycloak-hostname>:host-gateway"       
+    depends_on:
+      - obp-api
+      - redis
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8086/ || exit 1"]
+      interval: 30s
+      timeout: 20s
+      retries: 5
+      start_period: 60s
+    networks:
+      - obp-network
+
+  # API Manager II
+  api-manager:
+    image: openbankproject/api-manager-ii:latest
+    container_name: api-manager
+    restart: unless-stopped
+    env_file:
+      - env/api_manager_env
+    ports:
+      - "3003:3003"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "<api-hostname>:host-gateway"
+      - "<keycloak-hostname>:host-gateway"       
+    depends_on:
+      - obp-api
+      - redis
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3003/ || exit 1"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
+    networks:
+      - obp-network
+
+  # API Portal
+  api-portal:
+    image: openbankproject/obp-portal:latest
+    container_name: portal
+    restart: unless-stopped
+    env_file:
+      - env/api_portal_env
+    ports:
+      - "3000:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "<api-hostname>:host-gateway"
+      - "<keycloak-hostname>:host-gateway"       
+    depends_on:
+      - obp-api
+      - redis
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/ || exit 1"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
+    networks:
+      - obp-network
+
+  # Opey AI Assistant
+  opey:
+    image: openbankproject/opey:latest
+    container_name: opey
+    restart: unless-stopped
+    env_file:
+      - env/opey_env
+    ports:
+      - "5000:5000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "<api-hostname>:host-gateway"     
+    volumes:
+      - vectordb_data:/tmp/vectordb/
+    depends_on:
+      - obp-api
+      - redis
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/status || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - obp-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  vectordb_data:
+    driver: local
+
+networks:
+  obp-network:
+    driver: bridge

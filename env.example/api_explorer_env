@@ -1,0 +1,17 @@
+NODE_ENV=production
+VITE_OBP_API_HOST=http://localhost:8080
+VITE_OBP_API_PORTAL_HOST=http://localhost:3000
+VITE_OBP_API_EXPLORER_HOST=http://localhost:8085
+VITE_OBP_API_MANAGER_HOST=http://localhost:3003
+VITE_OBP_HOST=http://localhost:8080
+VITE_OAUTH2_REDIRECT_URL=http://localhost:8085/api/oauth2/callback
+#VITE_OBP_OAUTH2_WELL_KNOWN_URL=http://keycloak:8080/realms/obp/.well-known/openid-configuration
+VITE_OBP_OAUTH2_CLIENT_ID=<client_id>
+VITE_OBP_OAUTH2_CLIENT_SECRET=<client_secret>
+VITE_OBP_OAUTH2_REDIRECT_URL=http://localhost:8085/api/oauth2/callback
+VITE_OBP_OAUTH2_TOKEN_REFRESH_THRESHOLD=300
+VITE_KEYCLOAK_CLIENT_ID=<client_id>
+VITE_OBP_API_VERSION=v6.0.0
+VITE_OBP_API_DEFAULT_RESOURCE_DOC_VERSION=OBPv6.0.0
+VITE_OBP_REDIS_URL=redis://redis:6379
+VITE_SHOW_API_MANAGER_BUTTON=true
