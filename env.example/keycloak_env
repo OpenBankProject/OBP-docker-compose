@@ -16,11 +16,9 @@ HIBERNATE_DDL_AUTO=validate
 HIBERNATE_SHOW_SQL=true
 HIBERNATE_FORMAT_SQL=true
 # OBP Keycloak provider config
-DB_DRIVER=org.postgresql.Driver
-DB_DIALECT=org.hibernate.dialect.PostgreSQLDialect
-DB_USER=oidc_user
-DB_AUTHUSER_TABLE=v_oidc_users
-DB_URL=jdbc:postgresql://postgres:5432/obp
-DB_PASSWORD=<replace_with_db_password>
+OBP_API_USERNAME=    # needs `CanGetAnyUser`, `CanVerifyUserCredentials`, `CanGetProviders`
+OBP_API_PASSWORD=
+OBP_API_CONSUMER_KEY=
+OBP_API_URL=
 OBP_AUTHUSER_PROVIDER=http://obp-api:8080
-FORGOT_PASSWORD_URL=
+FORGOT_PASSWORD_URL=<portal_url>/forgot-password
