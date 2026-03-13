@@ -80,6 +80,7 @@ Once started, access the applications at:
 | Explorer | http://localhost:8085 | Interactive API docs |
 | API | http://localhost:8080 | Core OBP API |
 | Keycloak | http://localhost:8081 | OAuth2 admin console |
+| OBP OIDC | http://localhost:9009 | OAuth2 
 | Opey | http://localhost:5000 | AI assistant API |
 
 
