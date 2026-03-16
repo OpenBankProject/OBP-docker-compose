@@ -1,8 +1,8 @@
 ### Bootstrapping an OBP instance
 
-    cp -R env.example env
+    cp -a env.example env
 
-populate postgres_env
+populate env files. For localhost / non-proxy deployments, make sure to use **service names** as specified in docker-compose.yml ("obp-api", "api-portal", "postgres", "redis", etc.) instead of `localhost` in URLs and hostnames. Adding these hostnames to `/etc/hosts` is also necessary.
  
 For Bootstrapping, OBP-OIDC is recommended.
 
@@ -23,8 +23,51 @@ start services:
 
     sudo ./manage start
 
-use the `OBP_SUPER_ADMIN_USERNAME` to log in via direct login and grant the `OBP_OIDC_OPERATOR_USERNAME` the entitlements `CanVerifyUserCredentials`, `CanGetOidcClient`, `CanGetConsumers`.
+use the `OBP_SUPER_ADMIN_USERNAME` to log in via direct login:
 
+    curl --location --request POST 'http://localhost:8080/my/logins/direct' \
+    --header 'Authorization: DirectLogin username="$OBP_SUPER_ADMIN_USERNAME", password=$OBP_SUPER_ADMIN_INITAL_PASSWORD", consumer_key=$OBP_OIDC_OPERATOR_CONSUMER_KEY' \
+    --header 'Content-Type: application/json' \
+    --data ''
+
+copy the direct login from the response.
+
+get the user_id of oidc_user:
+
+    curl --location 'http://localhost:8080/obp/v6.0.0/users' \
+    --header 'Authorization: DirectLogin token=<direct_login_token>'
+
+add these entitlements to the OIDC user ($OBP_OIDC_OPERATOR_USERNAME):
+
+CanVerifyUserCredentials
+CanGetOidcClient
+CanGetConsumers
+CanGetProviders
+
+    curl --location 'http://localhost:8080/obp/v5.1.0/users/<oidc_user_id>/entitlements' \
+    --header 'Content-Type: application/json' \
+    --header 'Authorization: DirectLogin token=<direct_login_token>' \
+    --data '{  "bank_id":"",  "role_name":"CanVerifyUserCredentials"}'
+
+Create a consumer for OBP Portal:
+
+    curl --location 'http://localhost:8080/obp/v5.1.0/management/consumers' \
+    --header 'Content-Type: application/json' \
+    --header 'Accept: */*' \
+    --header 'Authorization: DirectLogin token=<direct_login_token>' \
+    --data-raw '{
+    "app_type": "Web",
+    "description": "OBP API Portal",
+    "enabled": true,
+    "redirect_url": "http://api-portal:3000/login/obp/callback",
+    "company": "My Company",
+    "developer_email": "my@email.com",
+    "app_name": "OBP Portal",
+    "client_certificate": "",
+    "logo_url": ""
+    }'
+
+put the response value of `consumer_id` as `OBP_OAUTH_CLIENT_ID` and `consumer_key` as `OBP_OAUTH_CLIENT_SECRET` into api_portal_env.
 
 create consumers (Get API Key) for
 
@@ -32,29 +75,4 @@ API Explorer (VITE_OBP_OAUTH2_CLIENT_ID=Consumer Key, VITE_OBP_OAUTH2_CLIENT_SEC
 API Manager (OBP_OAUTH_CLIENT_ID=Consumer Key, OBP_OAUTH_CLIENT_SECRET=Consumer Secret)
 API Portal (OBP_OAUTH_CLIENT_ID=Consumer Key, OBP_OAUTH_CLIENT_SECRET=Consumer Secret)
 
-First get the direct login token:
 
-```bash
-curl --location --request POST 'http://localhost:8080/my/logins/direct' \
---header 'Authorization: DirectLogin username="username",password="••••••",consumer_key=••••••' \
---header 'Content-Type: application/json'
-```
-Then get a consumer key pair for API Explorer (insert the direct login token):
-
-```bash
-curl --location 'https://localhost:8080/obp/v5.1.0/management/consumers' \
---header 'Content-Type: application/json' \
---header 'Authorization: DirectLogin token=••••••' \
---data-raw '{
-    "app_name": "API Explorer",
-    "app_type": "Public",
-    "description": "API Explorer",
-    "developer_email": "me@mydomain.com",
-    "redirect_url": "http://localhost:8085/api/oauth2/callback",
-    "company": "mycompany",
-    "enabled": true
-
-}'
-```
-
-Then get a consumer key pair for 
