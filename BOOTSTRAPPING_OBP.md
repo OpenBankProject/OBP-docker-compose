@@ -1,6 +1,6 @@
 ### Bootstrapping an OBP instance
 
-    cp env.example env
+    cp -R env.example env
 
 populate postgres_env
  
@@ -32,4 +32,29 @@ API Explorer (VITE_OBP_OAUTH2_CLIENT_ID=Consumer Key, VITE_OBP_OAUTH2_CLIENT_SEC
 API Manager (OBP_OAUTH_CLIENT_ID=Consumer Key, OBP_OAUTH_CLIENT_SECRET=Consumer Secret)
 API Portal (OBP_OAUTH_CLIENT_ID=Consumer Key, OBP_OAUTH_CLIENT_SECRET=Consumer Secret)
 
+First get the direct login token:
 
+```bash
+curl --location --request POST 'http://localhost:8080/my/logins/direct' \
+--header 'Authorization: DirectLogin username="username",password="••••••",consumer_key=••••••' \
+--header 'Content-Type: application/json'
+```
+Then get a consumer key pair for API Explorer (insert the direct login token):
+
+```bash
+curl --location 'https://localhost:8080/obp/v5.1.0/management/consumers' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: DirectLogin token=••••••' \
+--data-raw '{
+    "app_name": "API Explorer",
+    "app_type": "Public",
+    "description": "API Explorer",
+    "developer_email": "me@mydomain.com",
+    "redirect_url": "http://localhost:8085/api/oauth2/callback",
+    "company": "mycompany",
+    "enabled": true
+
+}'
+```
+
+Then get a consumer key pair for 
