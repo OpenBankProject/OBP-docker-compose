@@ -113,8 +113,8 @@ services:
       - "8085:8085"
     extra_hosts:
       - "host.docker.internal:host-gateway"
-      - "<api-hostname>:host-gateway"
-      - "<keycloak-hostname>:host-gateway"       
+#      - "<api-hostname>:host-gateway"
+#      - "<keycloak-hostname>:host-gateway"       
     depends_on:
       - obp-api
       - redis
@@ -137,8 +137,8 @@ services:
       - "8086:8085"
     extra_hosts:
       - "host.docker.internal:host-gateway"
-      - "<api-hostname>:host-gateway"
-      - "<keycloak-hostname>:host-gateway"       
+      #- "<api-hostname>:host-gateway"
+      #- "<keycloak-hostname>:host-gateway"       
     depends_on:
       - obp-api
       - redis
@@ -162,8 +162,8 @@ services:
       - "3003:3003"
     extra_hosts:
       - "host.docker.internal:host-gateway"
-      - "<api-hostname>:host-gateway"
-      - "<keycloak-hostname>:host-gateway"       
+      #- "<api-hostname>:host-gateway"
+      #- "<keycloak-hostname>:host-gateway"       
     depends_on:
       - obp-api
       - redis
@@ -187,8 +187,8 @@ services:
       - "3000:3000"
     extra_hosts:
       - "host.docker.internal:host-gateway"
-      - "<api-hostname>:host-gateway"
-      - "<keycloak-hostname>:host-gateway"       
+#      - "<api-hostname>:host-gateway"
+#      - "<keycloak-hostname>:host-gateway"       
     depends_on:
       - obp-api
       - redis
@@ -212,7 +212,7 @@ services:
       - "5000:5000"
     extra_hosts:
       - "host.docker.internal:host-gateway"
-      - "<api-hostname>:host-gateway"     
+#      - "<api-hostname>:host-gateway"     
     volumes:
       - vectordb_data:/tmp/vectordb/
     depends_on:
